@@ -1,0 +1,42 @@
+[
+  {
+    "event_id": "sa-001",
+    "entity_key": "S01",
+    "op": "upsert",
+    "seq": 1,
+    "event_time": "2026-02-10T01:00:00Z",
+    "payload": {"name": "城东店", "status": "open", "city": "杭州"}
+  },
+  {
+    "event_id": "sa-002",
+    "entity_key": "S02",
+    "op": "upsert",
+    "seq": 2,
+    "event_time": "2026-02-10T01:05:00Z",
+    "payload": {"name": "滨江店", "status": "open", "city": "杭州"}
+  },
+  {
+    "event_id": "sa-003",
+    "entity_key": "S01",
+    "op": "upsert",
+    "seq": 3,
+    "event_time": "2026-02-11T03:00:00Z",
+    "payload": {"name": "城东旗舰店", "status": "open", "city": "杭州"}
+  },
+  {
+    "event_id": "sa-004",
+    "entity_key": "S03",
+    "op": "upsert",
+    "seq": 4,
+    "event_time": "2026-02-12T04:00:00Z",
+    "payload": {"name": "西湖店", "status": "fitting", "city": "杭州"}
+  },
+  {
+    "event_id": "sa-005",
+    "entity_key": "S02",
+    "op": "upsert",
+    "seq": 5,
+    "event_time": "2026-02-09T22:00:00Z",
+    "payload": {"name": "滨江店", "status": "closed", "city": "杭州"}
+  }
+]

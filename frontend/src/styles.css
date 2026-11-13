@@ -1,0 +1,271 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #eceff3;
+  --ink: #1b222c;
+  --muted: #5f6b78;
+  --panel: #f8f9fb;
+  --line: #cfd6df;
+  --accent: #c45c26;
+  --accent-deep: #8f3d14;
+  --accent-soft: #f3ddd0;
+  --rail: #232b36;
+  --danger: #b33a3a;
+  --warn: #9a6b14;
+  --ok: #2d6a4f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(900px 420px at 88% -8%, rgba(196, 92, 38, 0.13), transparent 55%),
+    linear-gradient(180deg, #e4e9ef 0%, var(--bg) 38%, #e8ecf1 100%);
+  min-height: 100vh;
+}
+
+a { color: var(--accent-deep); }
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 0.85rem 1.5rem;
+  background: var(--rail);
+  color: #eef2f6;
+  border-bottom: 3px solid var(--accent);
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 9.5rem;
+}
+
+.brand-mark {
+  width: 0.72rem;
+  height: 2.1rem;
+  background: linear-gradient(180deg, #f0a06a, var(--accent) 55%, var(--accent-deep));
+  border-radius: 1px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-cn {
+  font-family: "Fraunces", "Songti SC", serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+}
+
+.brand-en {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aa7b6;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.nav a {
+  color: #b7c2cf;
+  text-decoration: none;
+  padding: 0.38rem 0.7rem;
+  border-radius: 2px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.nav a:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+
+.nav a.router-link-active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.stream-band {
+  height: 7px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--accent) 0 10px,
+      transparent 10px 18px,
+      #d8895a 18px 22px,
+      transparent 22px 34px
+    );
+  opacity: 0.85;
+}
+
+.content {
+  flex: 1;
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1.35rem 0 2.5rem;
+}
+
+.page h1 {
+  margin: 0 0 0.35rem;
+  font-family: "Fraunces", "Songti SC", serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.page h1::after {
+  content: "";
+  display: block;
+  width: 3.2rem;
+  height: 3px;
+  margin-top: 0.45rem;
+  background: var(--accent);
+}
+
+.page > .muted {
+  margin: 0.55rem 0 1rem;
+  max-width: 46rem;
+}
+
+.muted { color: var(--muted); }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 0;
+  padding: 1rem 1.1rem;
+  margin: 0.9rem 0;
+}
+
+.panel h3 {
+  margin: 0 0 0.75rem;
+  font-family: "Fraunces", "Songti SC", serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 700;
+  border-bottom: 2px solid #b8c2ce;
+}
+
+tbody tr:nth-child(even) { background: rgba(35, 43, 54, 0.03); }
+
+.mono {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.86em;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.12rem 0.45rem;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.tag.ok { background: #d7ebe2; color: var(--ok); }
+.tag.danger { background: #f3d6d6; color: var(--danger); }
+.tag.warn { background: #f3e5c2; color: var(--warn); }
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 2px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+button:hover { background: var(--accent-deep); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+input, select, textarea {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, white);
+  outline-offset: 1px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.2rem, 1fr));
+  gap: 0.65rem;
+}
+
+.stat {
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(180deg, #fff, #f1f4f7);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.stat-num {
+  font-family: "Fraunces", "Songti SC", serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 820px) {
+  .topbar { padding: 0.75rem 1rem; }
+  .content { width: calc(100% - 1.25rem); }
+  .nav a { padding: 0.32rem 0.5rem; font-size: 0.85rem; }
+}

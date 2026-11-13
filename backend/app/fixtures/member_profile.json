@@ -1,0 +1,50 @@
+[
+  {
+    "event_id": "mp-001",
+    "entity_key": "M1001",
+    "op": "upsert",
+    "seq": 1,
+    "event_time": "2026-03-01T08:00:00Z",
+    "payload": {"display_name": "林晓", "tier": "silver", "region": "east"}
+  },
+  {
+    "event_id": "mp-002",
+    "entity_key": "M1002",
+    "op": "upsert",
+    "seq": 2,
+    "event_time": "2026-03-01T08:05:00Z",
+    "payload": {"display_name": "周可", "tier": "bronze", "region": "north"}
+  },
+  {
+    "event_id": "mp-003",
+    "entity_key": "M1001",
+    "op": "upsert",
+    "seq": 3,
+    "event_time": "2026-03-01T09:00:00Z",
+    "payload": {"display_name": "林晓", "tier": "gold", "region": "east"}
+  },
+  {
+    "event_id": "mp-004",
+    "entity_key": "M1003",
+    "op": "upsert",
+    "seq": 4,
+    "event_time": "2026-03-01T09:10:00Z",
+    "payload": {"display_name": "何楠", "tier": "silver", "region": "south"}
+  },
+  {
+    "event_id": "mp-005",
+    "entity_key": "M1002",
+    "op": "delete",
+    "seq": 5,
+    "event_time": "2026-03-01T10:00:00Z",
+    "payload": null
+  },
+  {
+    "event_id": "mp-006",
+    "entity_key": "M1003",
+    "op": "upsert",
+    "seq": 6,
+    "event_time": "2026-03-01T08:30:00Z",
+    "payload": {"display_name": "何楠", "tier": "gold", "region": "south"}
+  }
+]
