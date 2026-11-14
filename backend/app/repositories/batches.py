@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import sqlite3
@@ -64,8 +65,9 @@ def insert_applied_event(
     conn.execute(
         """
         INSERT INTO applied_events(
-            batch_id, stream_id, event_id, entity_key, op, seq, event_time, result, created_at
-        ) VALUES (?,?,?,?,?,?,?,?,?)
+            batch_id, stream_id, event_id, entity_key, op, seq, event_time,
+            result, payload_json, created_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?)
         """,
         (
             batch_id,
@@ -76,6 +78,9 @@ def insert_applied_event(
             event["seq"],
             event["event_time"],
             event["result"],
+            json.dumps(event.get("payload"), ensure_ascii=False)
+            if event.get("payload") is not None
+            else None,
             created_at,
         ),
     )
@@ -98,4 +103,41 @@ def list_applied_events(
         params.append(stream_id)
     sql += " ORDER BY id DESC LIMIT ?"
     params.append(limit)
-    return [dict(r) for r in conn.execute(sql, params).fetchall()]
+    out: list[dict[str, Any]] = []
+    for r in conn.execute(sql, params).fetchall():
+        d = dict(r)
+        raw = d.pop("payload_json", None)
+        d["payload"] = json.loads(raw) if raw else None
+        out.append(d)
+    return out
+
+
+def get_batch_by_no(conn: sqlite3.Connection, batch_no: str) -> dict[str, Any] | None:
+    r = conn.execute("SELECT * FROM project_batches WHERE batch_no=?", (batch_no,)).fetchone()
+    return dict(r) if r else None
+
+
+def list_events_up_to(
+    conn: sqlite3.Connection, stream_id: int, watermark_seq: int
+) -> list[dict[str, Any]]:
+    """Applied events at seq <= watermark, oldest first.
+
+    Rows are ordered by (seq, id) so replaying them reproduces the projection
+    exactly as it stood once watermark_seq had been applied.
+    """
+    rows = conn.execute(
+        """
+        SELECT * FROM applied_events
+        WHERE stream_id=? AND seq<=? AND result IN ('applied_upsert','applied_delete')
+        ORDER BY seq ASC, id ASC
+        """,
+        (stream_id, watermark_seq),
+    ).fetchall()
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        d = dict(r)
+        raw = d.pop("payload_json", None)
+        d["payload"] = json.loads(raw) if raw else None
+        out.append(d)
+    return out
+

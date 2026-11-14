@@ -13,6 +13,7 @@
         <router-link to="/streams">投影流</router-link>
         <router-link to="/run">投影台</router-link>
         <router-link to="/projections">投影快照</router-link>
+        <router-link to="/cuts">投影切面</router-link>
         <router-link to="/batches">应用批次</router-link>
         <router-link to="/events">事件留痕</router-link>
         <router-link to="/buffer">缓冲区</router-link>

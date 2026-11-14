@@ -9,21 +9,31 @@ const note = ref('')
 const last = ref(null)
 const busy = ref(false)
 const err = ref('')
+const upToSeq = ref(null)
+const holdMs = ref(0)
+const working = ref({ cut: null, apply: null })
 
 async function refresh() {
   streams.value = await getJSON('/api/streams')
   batches.value = await getJSON('/api/batches?limit=20')
   if (streamId.value == null && streams.value.length) streamId.value = streams.value[0].id
+  if (streamId.value != null) {
+    working.value = await getJSON(`/api/concurrency?stream_id=${streamId.value}`)
+  }
 }
 
 async function run() {
   err.value = ''
   busy.value = true
   try {
-    last.value = await postJSON('/api/project', { stream_id: Number(streamId.value), note: note.value || null })
+    const body = { stream_id: Number(streamId.value), note: note.value || null }
+    if (upToSeq.value !== null && upToSeq.value !== '') body.up_to_seq = Number(upToSeq.value)
+    if (Number(holdMs.value)) body.hold_ms = Number(holdMs.value)
+    last.value = await postJSON('/api/project', body)
     await refresh()
   } catch (e) {
     err.value = String(e.message || e)
+    await refresh()
   } finally {
     busy.value = false
   }
@@ -50,10 +60,28 @@ onMounted(async () => {
         </label>
         <label>
           备注（可选）
-          <input v-model="note" style="display:block;width:16rem;margin-top:0.25rem" placeholder="本趟说明" />
+          <input v-model="note" style="display:block;width:12rem;margin-top:0.25rem" placeholder="本趟说明" />
+        </label>
+        <label>
+          截到 seq（可选）
+          <input v-model.number="upToSeq" type="number" min="0" placeholder="全部"
+                 style="display:block;width:7rem;margin-top:0.25rem" />
+        </label>
+        <label>
+          提交前停顿 ms
+          <input v-model.number="holdMs" type="number" min="0" max="10000" step="100"
+                 style="display:block;width:7rem;margin-top:0.25rem" />
         </label>
         <button :disabled="busy || !streamId" @click="run">{{ busy ? '投影中…' : '应用变更流' }}</button>
       </div>
+      <p class="muted" style="margin:0.7rem 0 0;font-size:0.86rem">
+        提交前停顿让批次处于「已写入未提交」状态，便于观察切面只读已提交快照。
+      </p>
+      <p v-if="working.cut" class="tag warn" style="margin-top:0.6rem">
+        同流切面固化进行中（策略 {{ working.cut.policy }}）
+        <template v-if="working.cut.policy === 'reject_apply'">，本次应用将被拒绝。</template>
+        <template v-else>，本次应用可开跑，切面仍读单一已提交快照。</template>
+      </p>
     </div>
 
     <div class="panel" v-if="last">
@@ -69,11 +97,14 @@ onMounted(async () => {
         <div class="stat"><div class="stat-num">{{ last.skipped_duplicate }}</div><div class="stat-label">跳过重复</div></div>
         <div class="stat"><div class="stat-num">{{ last.projected_alive }}</div><div class="stat-label">存活</div></div>
         <div class="stat"><div class="stat-num">{{ last.projected_deleted }}</div><div class="stat-label">已删</div></div>
+        <div class="stat"><div class="stat-num">{{ last.max_seq }}</div><div class="stat-label">max seq（水位）</div></div>
       </div>
       <p style="margin-top:0.75rem">
         <router-link :to="{ path: '/projections', query: { stream_id: last.stream_id } }">查看投影快照 →</router-link>
         ·
         <router-link :to="{ path: '/events', query: { batch_id: last.id } }">事件留痕 →</router-link>
+        ·
+        <router-link :to="{ path: '/cuts', query: { stream_id: last.stream_id } }">固化切面 →</router-link>
       </p>
     </div>
 

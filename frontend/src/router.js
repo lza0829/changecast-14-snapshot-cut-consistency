@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard.vue'
 import Streams from './pages/Streams.vue'
 import Run from './pages/Run.vue'
 import Projections from './pages/Projections.vue'
+import Cuts from './pages/Cuts.vue'
 import Batches from './pages/Batches.vue'
 import Events from './pages/Events.vue'
 import Buffer from './pages/Buffer.vue'
@@ -15,6 +16,7 @@ export default createRouter({
     { path: '/streams', component: Streams },
     { path: '/run', component: Run },
     { path: '/projections', component: Projections },
+    { path: '/cuts', component: Cuts },
     { path: '/batches', component: Batches },
     { path: '/events', component: Events },
     { path: '/buffer', component: Buffer },

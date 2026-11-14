@@ -96,6 +96,7 @@ def init_db() -> None:
                 seq INTEGER NOT NULL,
                 event_time TEXT NOT NULL,
                 result TEXT NOT NULL,
+                payload_json TEXT,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY(batch_id) REFERENCES project_batches(id),
                 FOREIGN KEY(stream_id) REFERENCES project_streams(id)
@@ -117,8 +118,67 @@ def init_db() -> None:
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS stream_ops(
+                id INTEGER PRIMARY KEY,
+                stream_id INTEGER NOT NULL,
+                kind TEXT NOT NULL,
+                token TEXT NOT NULL UNIQUE,
+                policy TEXT,
+                status TEXT NOT NULL DEFAULT 'active',
+                started_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                note TEXT,
+                FOREIGN KEY(stream_id) REFERENCES project_streams(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_stream_ops_stream ON stream_ops(stream_id, kind, status);
+            CREATE TABLE IF NOT EXISTS snapshot_cuts(
+                id INTEGER PRIMARY KEY,
+                cut_no TEXT NOT NULL UNIQUE,
+                stream_id INTEGER NOT NULL,
+                stream_code TEXT NOT NULL,
+                status TEXT NOT NULL,
+                bind_type TEXT NOT NULL,
+                requested_watermark INTEGER,
+                bind_batch_id INTEGER,
+                bind_batch_no TEXT,
+                bound_watermark_seq INTEGER NOT NULL,
+                snapshot_watermark_seq INTEGER,
+                snapshot_batch_id INTEGER,
+                snapshot_batch_no TEXT,
+                committed_watermark_at_cut INTEGER,
+                read_mode TEXT NOT NULL,
+                policy TEXT NOT NULL,
+                row_count INTEGER NOT NULL,
+                alive_count INTEGER NOT NULL,
+                deleted_count INTEGER NOT NULL,
+                verify_method TEXT,
+                failure_reason TEXT,
+                started_at TEXT NOT NULL,
+                finished_at TEXT NOT NULL,
+                note TEXT,
+                FOREIGN KEY(stream_id) REFERENCES project_streams(id),
+                FOREIGN KEY(bind_batch_id) REFERENCES project_batches(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_snapshot_cuts_stream ON snapshot_cuts(stream_id, id);
+            CREATE TABLE IF NOT EXISTS cut_rows(
+                id INTEGER PRIMARY KEY,
+                cut_id INTEGER NOT NULL,
+                entity_key TEXT NOT NULL,
+                applied_seq INTEGER NOT NULL,
+                applied_event_id TEXT,
+                deleted INTEGER NOT NULL,
+                payload_digest TEXT NOT NULL,
+                UNIQUE(cut_id, entity_key),
+                FOREIGN KEY(cut_id) REFERENCES snapshot_cuts(id) ON DELETE CASCADE
+            );
             """
         )
+        # Lightweight migration: applied_events gained payload_json so a
+        # projection can be reconstructed as-of a watermark from the log.
+        cols = {r["name"] for r in conn.execute("PRAGMA table_info(applied_events)")}
+        if "payload_json" not in cols:
+            conn.execute("ALTER TABLE applied_events ADD COLUMN payload_json TEXT")
+
         if conn.execute("SELECT COUNT(*) c FROM project_streams").fetchone()["c"] == 0:
             now = _now()
             for s in STREAM_SEEDS:
@@ -153,6 +213,20 @@ def init_db() -> None:
             conn.execute(
                 "INSERT INTO settings(key, value) VALUES (?, ?)",
                 ("tombstone_mode", "soft_delete"),
+            )
+        conn.execute(
+            "INSERT OR IGNORE INTO settings(key, value) VALUES (?, ?)",
+            ("cut_policy", "reject_apply"),
+        )
+        # A cut left 'running' by a previous process can never finish; it must
+        # not survive as a half-valid cut.
+        for r in conn.execute(
+            "SELECT id FROM snapshot_cuts WHERE status='running'"
+        ).fetchall():
+            conn.execute("DELETE FROM cut_rows WHERE cut_id=?", (r["id"],))
+            conn.execute(
+                "UPDATE snapshot_cuts SET status='failed', failure_reason=?, finished_at=? WHERE id=?",
+                ("进程重启，切面未完成", _now(), r["id"]),
             )
         conn.commit()
     finally:

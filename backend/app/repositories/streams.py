@@ -29,3 +29,16 @@ def set_watermark(conn: sqlite3.Connection, stream_id: int, watermark_seq: int) 
         "UPDATE project_streams SET watermark_seq=? WHERE id=?",
         (watermark_seq, stream_id),
     )
+
+
+def committed_watermark(conn: sqlite3.Connection, stream_id: int) -> int:
+    """The watermark committed together with the live projection.
+
+    project_streams.watermark_seq is written in the same transaction as the
+    projection replacement, so it is the position the current projection has
+    actually reached — never a partially-applied position.
+    """
+    r = conn.execute(
+        "SELECT watermark_seq FROM project_streams WHERE id=?", (stream_id,)
+    ).fetchone()
+    return int(r["watermark_seq"]) if r else 0
